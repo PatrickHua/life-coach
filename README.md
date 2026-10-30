@@ -8,7 +8,8 @@ Everything is plain files: Markdown for judgment (persona, skills, subagents), J
 
 1. Create your own copy of this repo (keep it private: it will hold your memory).
 2. Open [claude.ai/code](https://claude.ai/code) and start a session with your copy selected.
-3. Say "set up my coach". It walks you through five steps: cloud, Google Calendar, Gmail, saving memory, and scheduled check-ins.
+3. Say "set up my coach". It walks you through five steps: cloud, Google Calendar, Gmail, making this session its home, and scheduled check-ins.
+4. Keep talking to the coach in that same session. Its memory lives on that session's machine and is never pushed anywhere unless you ask for an export.
 
 ## How it's put together
 

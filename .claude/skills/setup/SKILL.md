@@ -26,19 +26,19 @@ Call the Gmail `search_threads` tool with a narrow query, such as messages from 
 - Tell them plainly: the coach reads email to find what matters and can draft replies, but it can never send.
 - Record it: `python3 scripts/mark_setup.py gmail "search returned <n> threads"`
 
-## 4. memory_repo
+## 4. home
 
-Memory only survives if it's committed and pushed back to GitHub.
-- Make a small change (add today's date to `memory/profile.md` under "Set up on"), commit it, and push.
-- If the push works, record it: `python3 scripts/mark_setup.py memory_repo "pushed <commit sha> to <branch>"`
-- If the push lands on a branch other than the default branch, tell the user. Memory written on a side branch won't be seen by the next session.
+The coach lives in this one session, and its memory lives in `memory/` on this machine. Nothing is pushed to GitHub or copied elsewhere unless the user asks for an export.
+- Write today's date under "Set up on" in `memory/profile.md`.
+- Tell the user plainly: this session is the coach's home. Keep it, don't archive it, and talk to the coach here. A new session starts on a fresh machine without this memory.
+- Record it: `python3 scripts/mark_setup.py home "session $CLAUDE_CODE_SESSION_ID"`
 
 ## 5. schedules
 
-Create three scheduled tasks, each starting a fresh session in this environment, with push notifications on:
-- **Heartbeat**, hourly: "Life coach heartbeat. Check memory, calendar and goals. Usually do nothing. If something is worth the user's attention, propose one nudge."
-- **Morning brief**, weekdays around 8:40am in the user's timezone: "Life coach morning brief. Use the morning-brief skill."
-- **Weekly review**, Sunday evening: "Life coach weekly review. Use the weekly-review skill."
+Create three scheduled tasks that fire into **this session** (not a fresh session each time), so they see the same memory. Start each prompt with a `[coach:...]` tag; the reply tracker uses it to tell scheduled wake-ups from the user's own messages.
+- **Heartbeat**, hourly: "[coach:heartbeat] Check memory, calendar and goals. Usually do nothing. If something is worth the user's attention, propose one nudge."
+- **Morning brief**, weekdays around 8:40am in the user's timezone: "[coach:morning] Use the morning-brief skill."
+- **Weekly review**, Sunday evening: "[coach:weekly] Use the weekly-review skill."
 
 Then record it: `python3 scripts/mark_setup.py schedules "heartbeat, morning brief, weekly review"`
 

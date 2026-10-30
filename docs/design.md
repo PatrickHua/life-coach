@@ -10,7 +10,7 @@ A coach that reaches out first, but rarely and at good moments. It knows your ca
 2. **The model proposes, code decides.** Judgment (what to say, which skill, is this email important) lives in Markdown. Anything that must always hold (quiet hours, caps, setup order, never send email) lives in scripts run by hooks, or in permission rules.
 3. **Silent by default.** Every wake-up may end with no message. The gate in `scripts/gate.py` has the final say.
 4. **The coach never grades itself.** A separate subagent with fresh context verifies goals against evidence agreed up front.
-5. **Memory is yours.** Plain files you can read and edit. Facts get end dates instead of being overwritten.
+5. **Memory is yours and stays put.** Plain files you can read and edit, kept on the home session's machine. Nothing is pushed or copied elsewhere unless you ask for an export. Facts get end dates instead of being overwritten.
 6. **Keep the harness thin.** Rules that only patch model weaknesses should be deleted as models improve. Safety limits stay.
 
 ## Model or code?
@@ -45,7 +45,7 @@ The calendar holds plans; `memory/timelog.jsonl` holds what happened. The coach 
 
 ## Open questions
 
-- Do scheduled-task sessions push memory to the default branch, or to a side branch the next session won't see?
-- Can scheduled-task sessions publish artifacts and send files, or only push notifications?
+- How long does an idle home session keep its disk? Files survived one machine restart on 2026-10-30, but a session that is archived or reclaimed loses its memory unless you exported it.
+- Can a scheduled wake-up in the home session publish artifacts and send files, or only push notifications?
 - Is hourly the shortest heartbeat this account allows?
 - Two-way chat (Telegram) and live email or calendar events need an always-on service; out of scope for now.

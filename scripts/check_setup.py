@@ -10,7 +10,7 @@ NEXT_STEP_HINTS = {
     "cloud": "Running on a local machine. The coach needs Claude Code on the web so it can run while the user's computer is off.",
     "calendar": "Google Calendar is not connected or not tested yet.",
     "gmail": "Gmail is not connected or not tested yet.",
-    "memory_repo": "Memory can't be saved yet: committing and pushing memory/ hasn't been tested.",
+    "home": "This session isn't recorded as the coach's home session yet.",
     "schedules": "Scheduled tasks (heartbeat, morning brief, weekly review) are not created yet.",
 }
 

@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(os.environ.get("CLAUDE_PROJECT_DIR", Path(__file__).resolve().parent.parent))
 MEMORY = ROOT / "memory"
 
-SETUP_STEPS = ["cloud", "calendar", "gmail", "memory_repo", "schedules"]
+SETUP_STEPS = ["cloud", "calendar", "gmail", "home", "schedules"]
 
 
 def load_json(name, default):
