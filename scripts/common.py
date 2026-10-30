@@ -1,14 +1,29 @@
 """Shared helpers for the coach's hook scripts."""
 import json
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(os.environ.get("CLAUDE_PROJECT_DIR", Path(__file__).resolve().parent.parent))
 MEMORY = ROOT / "memory"
+TEMPLATES = ROOT / "templates" / "memory"
 
 SETUP_STEPS = ["cloud", "calendar", "gmail", "home", "schedules"]
+
+
+def ensure_memory():
+    """Create memory/ from the templates on first run. Existing files are never touched,
+    so updates to the code can't overwrite what the coach has learned."""
+    (MEMORY / "goals").mkdir(parents=True, exist_ok=True)
+    for src in TEMPLATES.glob("*"):
+        dest = MEMORY / src.name
+        if not dest.exists():
+            shutil.copy(src, dest)
+
+
+ensure_memory()
 
 
 def load_json(name, default):

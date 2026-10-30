@@ -6,10 +6,13 @@ Everything is plain files: Markdown for judgment (persona, skills, subagents), J
 
 ## Get started
 
-1. Create your own copy of this repo (keep it private: it will hold your memory).
-2. Open [claude.ai/code](https://claude.ai/code) and start a session with your copy selected.
-3. Say "set up my coach". It walks you through five steps: cloud, Google Calendar, Gmail, making this session its home, and scheduled check-ins.
-4. Keep talking to the coach in that same session. Its memory lives on that session's machine and is never pushed anywhere unless you ask for an export.
+1. Open [claude.ai/code](https://claude.ai/code) and start a session with this repo selected.
+2. Say "set up my coach". It walks you through five steps: cloud, Google Calendar, Gmail, making this session its home, and scheduled check-ins.
+3. Keep talking to the coach in that same session. Its memory lives on that session's machine and is never pushed anywhere unless you ask for an export.
+
+## Updating
+
+When new code is pushed here, the coach notices at the next session start and offers to update. Say "update the coach" any time. Updating pulls the new code with git; `memory/` is ignored by git, so what the coach has learned is never touched.
 
 ## How it's put together
 
@@ -20,7 +23,7 @@ Everything is plain files: Markdown for judgment (persona, skills, subagents), J
 | Subagents: goal verifier, retro | `.claude/agents/` | the model, with fresh context |
 | Setup check, nudge gate, reply tracking | `scripts/`, run by hooks in `.claude/settings.json` | code |
 | Never send email, never delete events | `permissions.deny` in `.claude/settings.json` | Claude Code |
-| Memory | `memory/` | readable and editable by you |
+| Memory | `memory/`, created from `templates/memory/`, ignored by git | readable and editable by you |
 
 See [docs/design.md](docs/design.md) for the reasoning.
 

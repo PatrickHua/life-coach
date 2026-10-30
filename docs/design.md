@@ -38,10 +38,14 @@ The calendar holds plans; `memory/timelog.jsonl` holds what happened. The coach 
 
 | Script | Hook | Job |
 |---|---|---|
-| `check_setup.py` | SessionStart | detect cloud, print setup status |
+| `check_setup.py` | SessionStart | create memory from templates, check for updates, detect cloud, print setup status |
 | `gate.py` | PreToolUse | block scheduling before setup; enforce quiet hours, daily cap, cooldown; log nudges |
 | `mark_reply.py` | UserPromptSubmit | mark nudges as answered when you reply in that session |
 | `mark_setup.py` | run by the model | record a setup step after testing it |
+
+## Updates
+
+Code comes from GitHub; memory is created from `templates/memory/` and ignored by git. So an installed coach updates with `git pull --ff-only` and keeps everything it has learned. New memory files in the templates are added on the next run; existing ones are never replaced. If a future version needs to change the shape of existing memory, it ships a migration script that the update skill runs.
 
 ## Open questions
 

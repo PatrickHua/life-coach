@@ -40,6 +40,8 @@ All memory lives in `memory/` as plain files the user can read and edit.
 | `config.json` | timezone, quiet hours, daily cap, user preferences |
 | `setup.json` | setup progress, written only by scripts |
 
+`memory/` is created from `templates/memory/` on first run and is ignored by git, so updating the coach's code never touches it.
+
 When a fact changes, don't delete the old line. Mark it with an end date and add the new one.
 
 Memory stays on this machine. Never commit or push it, and never copy it anywhere else, unless the user asks for an export (a file, a folder or a zip).
