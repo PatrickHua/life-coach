@@ -1,0 +1,16 @@
+{
+  "timezone": "America/Los_Angeles",
+  "coach_calendar_id": null,
+  "gate": {
+    "quiet_start": "22:00",
+    "quiet_end": "08:00",
+    "daily_cap": 3,
+    "reply_window_hours": 6,
+    "ignored_streak": 2,
+    "cooldown_hours": 24
+  },
+  "time_log": {
+    "max_questions_per_day": 2,
+    "dont_ask_about": []
+  }
+}
