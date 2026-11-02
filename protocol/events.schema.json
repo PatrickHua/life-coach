@@ -1,0 +1,482 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lifecoach/events.schema.json",
+  "title": "Harness → agent event",
+  "type": "object",
+  "required": [
+    "type",
+    "id",
+    "ts",
+    "context"
+  ],
+  "properties": {
+    "type": {
+      "enum": [
+        "start",
+        "contract_assigned",
+        "verification_result",
+        "contract_closed",
+        "user_message",
+        "button_tap",
+        "wakeup",
+        "calendar",
+        "proposal_result",
+        "message_sent",
+        "rejected",
+        "user_feedback"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "ts": {
+      "$ref": "#/$defs/datetime"
+    },
+    "context": {
+      "$ref": "#/$defs/context"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "start"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "agent_version"
+        ],
+        "properties": {
+          "agent_version": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "contract_assigned"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "contract"
+        ],
+        "properties": {
+          "contract": {
+            "$ref": "#/$defs/contract"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "verification_result"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "contract_id",
+          "answer"
+        ],
+        "properties": {
+          "contract_id": {
+            "type": "string"
+          },
+          "answer": {
+            "enum": [
+              "achieved",
+              "not_yet",
+              "gave_up"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "contract_closed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "contract_id",
+          "achieved",
+          "days"
+        ],
+        "properties": {
+          "contract_id": {
+            "type": "string"
+          },
+          "achieved": {
+            "type": "boolean"
+          },
+          "days": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "user_message"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "reply_to": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "button_tap"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "message_id",
+          "choice"
+        ],
+        "properties": {
+          "message_id": {
+            "type": "string"
+          },
+          "choice": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "wakeup"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "wakeup_id",
+          "note"
+        ],
+        "properties": {
+          "wakeup_id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "calendar"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "req_id",
+          "events"
+        ],
+        "properties": {
+          "req_id": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/calendar_event"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "proposal_result"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "proposal_id",
+          "accepted"
+        ],
+        "properties": {
+          "proposal_id": {
+            "type": "string"
+          },
+          "accepted": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "message_sent"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "req_id",
+          "message_id"
+        ],
+        "properties": {
+          "req_id": {
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "rejected"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "action",
+          "reason"
+        ],
+        "properties": {
+          "req_id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/$defs/rejection_reason"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "user_feedback"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "message_id",
+          "kind"
+        ],
+        "properties": {
+          "message_id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "thumbs_down",
+              "too_pushy"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "now",
+        "timezone",
+        "quiet_hours",
+        "in_quiet_hours",
+        "messages_left_today",
+        "awaiting_reply",
+        "paused",
+        "contracts"
+      ],
+      "properties": {
+        "now": {
+          "$ref": "#/$defs/datetime"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "quiet_hours": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "string"
+            },
+            "end": {
+              "type": "string"
+            }
+          }
+        },
+        "in_quiet_hours": {
+          "type": "boolean"
+        },
+        "messages_left_today": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "awaiting_reply": {
+          "type": "boolean"
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "contracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contract"
+          }
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "required": [
+        "id",
+        "goal",
+        "done_means",
+        "deadline",
+        "evidence",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "done_means": {
+          "type": "string"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date"
+        },
+        "evidence": {
+          "enum": [
+            "self_report",
+            "link",
+            "file",
+            "witness"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "verifying",
+            "closed"
+          ]
+        }
+      }
+    },
+    "calendar_event": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "title",
+        "busy",
+        "coach"
+      ],
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/datetime"
+        },
+        "end": {
+          "$ref": "#/$defs/datetime"
+        },
+        "title": {
+          "type": "string"
+        },
+        "busy": {
+          "type": "boolean"
+        },
+        "coach": {
+          "type": "boolean"
+        }
+      }
+    },
+    "rejection_reason": {
+      "enum": [
+        "invalid_schema",
+        "too_long",
+        "too_many_pages",
+        "too_many_buttons",
+        "button_too_long",
+        "missing_why",
+        "over_daily_cap",
+        "min_gap",
+        "double_text",
+        "duplicate",
+        "quiet_hours",
+        "paused",
+        "verify_too_soon",
+        "verify_pending",
+        "unknown_contract",
+        "contract_closed",
+        "calendar_range",
+        "wakeup_in_past",
+        "unknown_wakeup",
+        "turn_timeout"
+      ]
+    }
+  }
+}
