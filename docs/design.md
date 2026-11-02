@@ -52,4 +52,5 @@ Code comes from GitHub; memory is created from `templates/memory/` and ignored b
 - How long does an idle home session keep its disk? Files survived one machine restart on 2026-10-30, but a session that is archived or reclaimed loses its memory unless you exported it.
 - Can a scheduled wake-up in the home session publish artifacts and send files, or only push notifications?
 - Is hourly the shortest heartbeat this account allows?
+- Scheduled wake-ups aren't guaranteed: on 2026-11-02 the 8:41 morning task didn't fire and the 9:17 heartbeat arrived 13 minutes late. The heartbeat should cover for a missed morning plan.
 - Two-way chat (Telegram) and live email or calendar events need an always-on service; out of scope for now.
