@@ -8,7 +8,7 @@ A coach that reaches out first, but rarely and at good moments. It knows your ca
 
 1. **One agent, many skills.** Skills are how-to guides loaded when a job comes up. No graph of agents.
 2. **The model proposes, code decides.** Judgment (what to say, which skill, is this email important) lives in Markdown. Anything that must always hold (quiet hours, caps, setup order, never send email) lives in scripts run by hooks, or in permission rules.
-3. **Silent by default.** Every wake-up may end with no message. The gate in `scripts/gate.py` has the final say.
+3. **Silent by default, persistent when it matters.** Every wake-up may end with no message, and the gate in `scripts/gate.py` has the final say. An unanswered nudge only spaces out the next one (3h by default); it never mutes the coach. Only the user can pause it.
 4. **The coach never grades itself.** A separate subagent with fresh context verifies goals against evidence agreed up front.
 5. **Memory is yours and stays put.** Plain files you can read and edit, kept on the home session's machine. Nothing is pushed or copied elsewhere unless you ask for an export. Facts get end dates instead of being overwritten.
 6. **Keep the harness thin.** Rules that only patch model weaknesses should be deleted as models improve. Safety limits stay.
@@ -19,7 +19,7 @@ Ask: if the model gets this wrong once, what happens?
 
 | Mild awkwardness, so Markdown | Real harm or broken state, so code |
 |---|---|
-| which skill fits | quiet hours, daily cap, cooldown |
+| which skill fits | quiet hours, daily cap, retry spacing, pause |
 | how to phrase a nudge | setup order |
 | whether an email matters | never send email or delete events |
 | whether the user seems stressed | deadline reached, so verify |
@@ -39,7 +39,7 @@ The calendar holds plans; `memory/timelog.jsonl` holds what happened. The coach 
 | Script | Hook | Job |
 |---|---|---|
 | `check_setup.py` | SessionStart | create memory from templates, check for updates, detect cloud, print setup status |
-| `gate.py` | PreToolUse | block scheduling before setup; enforce quiet hours, daily cap, cooldown; log nudges |
+| `gate.py` | PreToolUse | block scheduling before setup; enforce quiet hours, daily cap, retry spacing and pause; log nudges |
 | `mark_reply.py` | UserPromptSubmit | mark nudges as answered when you reply in that session |
 | `mark_setup.py` | run by the model | record a setup step after testing it |
 

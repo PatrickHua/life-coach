@@ -46,16 +46,15 @@ def check_push(cfg, session_id, message):
     if len(today) >= cap:
         block(f"daily cap of {cap} nudges reached. Add it to the next digest instead.")
 
-    # Back off after repeated silence: the last N nudges older than the reply window all went unanswered.
-    window = timedelta(hours=gate.get("reply_window_hours", 6))
-    settled = [n for n in nudges if t - datetime.fromisoformat(n["at"]) > window]
-    streak = gate.get("ignored_streak", 2)
-    recent = settled[-streak:]
-    if len(recent) == streak and not any(n.get("replied") for n in recent):
-        last = datetime.fromisoformat(recent[-1]["at"])
-        cooldown = timedelta(hours=gate.get("cooldown_hours", 24))
-        if t - last < cooldown:
-            block(f"the last {streak} nudges got no reply. Cooling down until {(last + cooldown):%a %H:%M}.")
+    # Silence usually means the user forgot, not that they want quiet. So an unanswered
+    # nudge only spaces out the next one; it never mutes the coach. Only the user can do that.
+    if gate.get("paused"):
+        block("the user paused the coach. Wait until they say to resume.")
+    if nudges and not nudges[-1].get("replied"):
+        last = datetime.fromisoformat(nudges[-1]["at"])
+        gap = timedelta(hours=gate.get("retry_gap_hours", 3))
+        if t - last < gap:
+            block(f"the last nudge is still unanswered. Try again after {(last + gap):%a %H:%M}, worded differently.")
 
     nudges.append({"at": t.isoformat(timespec="seconds"), "session": session_id, "message": message, "replied": False})
     write_jsonl("nudges.jsonl", nudges)

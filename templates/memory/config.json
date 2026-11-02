@@ -5,9 +5,8 @@
     "quiet_start": "22:00",
     "quiet_end": "08:00",
     "daily_cap": 3,
-    "reply_window_hours": 6,
-    "ignored_streak": 2,
-    "cooldown_hours": 24
+    "retry_gap_hours": 3,
+    "paused": false
   },
   "time_log": {
     "max_questions_per_day": 2,
