@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lifecoach/actions.schema.json",
+  "title": "Agent → harness action",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/send_message"
+    },
+    {
+      "$ref": "#/$defs/schedule_wakeup"
+    },
+    {
+      "$ref": "#/$defs/cancel_wakeup"
+    },
+    {
+      "$ref": "#/$defs/get_calendar"
+    },
+    {
+      "$ref": "#/$defs/propose_event"
+    },
+    {
+      "$ref": "#/$defs/request_verification"
+    },
+    {
+      "$ref": "#/$defs/flag"
+    },
+    {
+      "$ref": "#/$defs/done"
+    }
+  ],
+  "$defs": {
+    "datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "short_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 280
+    },
+    "send_message": {
+      "type": "object",
+      "required": [
+        "type",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "send_message"
+        },
+        "req_id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "more": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "buttons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "$comment": "Lengths and counts are deliberately not limited here: harness/limits.py checks them and replies with a specific rejection reason (too_long, too_many_buttons, ...) the agent can act on."
+    },
+    "schedule_wakeup": {
+      "type": "object",
+      "required": [
+        "type",
+        "at",
+        "note"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "schedule_wakeup"
+        },
+        "wakeup_id": {
+          "$ref": "#/$defs/id"
+        },
+        "at": {
+          "$ref": "#/$defs/datetime"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 280
+        }
+      }
+    },
+    "cancel_wakeup": {
+      "type": "object",
+      "required": [
+        "type",
+        "wakeup_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "cancel_wakeup"
+        },
+        "wakeup_id": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "get_calendar": {
+      "type": "object",
+      "required": [
+        "type",
+        "req_id",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "get_calendar"
+        },
+        "req_id": {
+          "$ref": "#/$defs/id"
+        },
+        "start": {
+          "$ref": "#/$defs/datetime"
+        },
+        "end": {
+          "$ref": "#/$defs/datetime"
+        }
+      }
+    },
+    "propose_event": {
+      "type": "object",
+      "required": [
+        "type",
+        "req_id",
+        "title",
+        "start",
+        "end",
+        "why"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "propose_event"
+        },
+        "req_id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "start": {
+          "$ref": "#/$defs/datetime"
+        },
+        "end": {
+          "$ref": "#/$defs/datetime"
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        }
+      }
+    },
+    "flag": {
+      "type": "object",
+      "required": [
+        "type",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "flag"
+        },
+        "kind": {
+          "enum": [
+            "crisis",
+            "user_distress",
+            "bug"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "done": {
+      "type": "object",
+      "required": [
+        "type",
+        "event_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "done"
+        },
+        "event_id": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "request_verification": {
+      "type": "object",
+      "required": [
+        "type",
+        "contract_id",
+        "why"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "request_verification"
+        },
+        "req_id": {
+          "$ref": "#/$defs/id"
+        },
+        "contract_id": {
+          "$ref": "#/$defs/id"
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        }
+      }
+    }
+  }
+}

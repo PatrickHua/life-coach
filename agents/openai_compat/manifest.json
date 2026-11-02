@@ -1,0 +1,6 @@
+{
+  "name": "openai_compat",
+  "description": "A simple LLM coach for any OpenAI-compatible endpoint: OpenAI, OpenRouter, vLLM, Ollama, LM Studio, and others.",
+  "command": ["python3", "{agent_dir}/agent.py"],
+  "env": ["LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL", "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY"]
+}
