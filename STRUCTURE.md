@@ -4,78 +4,55 @@ One rule shapes everything: **the harness is trusted, the agent is not.** They l
 
 ```
 lifecoach/
-├── README.md
+├── README.md                   # setup and testing
 ├── STRUCTURE.md                # this file
-├── pyproject.toml
-├── .env.example                # TELEGRAM_BOT_TOKEN, ALLOWED_USER_ID, GOOGLE_CLIENT_ID,
-│                               # GOOGLE_CLIENT_SECRET, TOKEN_KEY, AGENT
+├── pyproject.toml, requirements.txt
+├── .env.example                # copy to .env
 │
-├── harness/                    # TRUSTED. The improving system never edits this.
-│   ├── main.py                 # entry point: starts the bot, loads the agent, runs the clock
-│   ├── config.py               # all limits and timeouts in one place
-│   │
-│   ├── telegram_io.py          # Telegram in/out; the only code that talks to Telegram
-│   ├── onboarding.py           # /start flow: connect calendar → timezone/quiet hours → first contract
-│   ├── commands.py             # /pause /resume /stop /why /undo /goals /export /forget
-│   ├── buttons.py              # button rendering, one-tap removal, expiry, [More ▾] paging
-│   │
-│   ├── calendar.py             # Google OAuth, token storage, read queries, "Coach" calendar writes;
-│   │                           # refuses to touch events it didn't create
-│   ├── proposals.py            # turns agent proposals into harness-drawn confirm buttons; /undo
-│   │
-│   ├── contract.py             # fixed goal form; create, freeze (hash), load; no edits after freeze
-│   ├── verifier.py             # asks "did you achieve it?" in fixed wording, when the agent requests it,
-│   │                           # on /done, or at the deadline; collects evidence outside the agent's chat;
-│   │                           # coach-created calendar events never count as evidence
-│   ├── scorer.py               # computes scores and guardrail flags from the event log
-│   │
-│   ├── relay.py                # event → agent → actions; validates every action against the schema
+├── harness/                    # TRUSTED. Agents and self-improving systems never edit this.
+│   ├── main.py                 # entry point: python -m harness.main
+│   ├── config.py               # all limits and settings in one place
+│   ├── core.py                 # the harness: onboarding, goal form, commands, buttons, verification,
+│   │                           # turns with the agent, the clock (wakeups, deadlines)
 │   ├── limits.py               # message length, buttons, daily cap, quiet hours, min gap,
-│   │                           # double-texting, duplicates; returns accept / reject(reason)
-│   ├── safety.py               # crisis keywords + agent flags → fixed safe reply, pause coaching
-│   ├── agent_process.py        # runs the agent as a subprocess; timeouts; crash → retry → baseline
-│   └── store.py                # append-only writes to data/; the only code that writes there
+│   │                           # double-texting, duplicates, splitting long text behind [More]
+│   ├── contract.py             # goal contracts: freeze (hash, read-only file), load, detect tampering
+│   ├── agent_process.py        # runs the agent as a subprocess with a bare environment; versions by hash
+│   ├── calendar.py             # Google Calendar: read the user's calendars, write only to a "Coach" calendar
+│   ├── calendar_login.py       # one-time Google sign-in: python -m harness.calendar_login
+│   ├── safety.py               # crisis keywords → fixed safe reply, coaching paused
+│   ├── scorer.py               # scores per agent version, from harness-owned logs only
+│   ├── store.py                # the only code that writes to data/; logs are append-only
+│   └── telegram_io.py          # the only code that talks to Telegram; allowlist of one user
 │
 ├── protocol/                   # THE CONTRACT BETWEEN THE TWO SIDES
-│   ├── PROTOCOL.md             # events, actions, limits, errors, examples
+│   ├── PROTOCOL.md             # events, actions, limits, verification, errors
 │   ├── events.schema.json      # harness → agent
-│   └── actions.schema.json     # agent → harness
+│   └── actions.schema.json     # agent → harness (every action is validated against this)
 │
-├── agents/                     # UNTRUSTED. The improving system works here.
-│   ├── baseline/               # dumb reminder bot: the floor every agent should beat,
-│   │   ├── agent.py            # and the fallback when an agent crashes
-│   │   └── manifest.json       # {"name", "command", "network": []}
-│   └── claude_coach/           # first real agent; its insides are its own business
-│       ├── agent.py
-│       ├── manifest.json       # e.g. "network": ["api.anthropic.com"]
-│       └── prompts/
-│
-├── data/                       # HARNESS-OWNED. Gitignored. The agent has no access.
-│   ├── contracts/              # one frozen JSON per goal, named by its hash
-│   ├── events.jsonl            # every event, action and rejection, append-only
-│   ├── evidence/               # files and links submitted at verification
-│   ├── verifications.jsonl     # every request (who asked, why) and the user's answer
-│   ├── calendar/               # encrypted Google token; ids of events the coach created
-│   └── scores.csv              # agent version, contract, achieved, days, guardrail flags
-│
-├── agent_state/                # one private folder per agent version: the agent's only writable space
-│   └── claude_coach@a1b2c3/
+├── agents/                     # UNTRUSTED. Swap in anything that speaks the protocol.
+│   ├── README.md               # how to write or wrap an agent
+│   ├── mock/                   # keyword-driven test agent, no model
+│   └── openai_compat/          # simple LLM coach for any OpenAI-compatible endpoint
 │
 ├── tools/
-│   ├── score.py                # print the score per agent version
-│   ├── replay.py               # replay events.jsonl against an agent offline
-│   └── fake_user.py            # chat with an agent in the terminal, no Telegram
+│   ├── fake_user.py            # chat with the harness in your terminal: python -m tools.fake_user
+│   └── score.py                # print scores, write data/scores.csv: python -m tools.score
 │
-└── tests/
-    ├── test_contract_frozen.py # editing a frozen contract fails
-    ├── test_limits.py          # length, buttons, cap, quiet hours, gap, double-text, duplicates
-    ├── test_more_paging.py     # long content becomes [More ▾] pages
-    ├── test_calendar_guard.py  # can't move/delete user events; coach events aren't evidence
-    ├── test_proposals.py       # nothing is written without the user's ✅
-    ├── test_verification.py    # rate limit, one pending request, expiry, deadline backstop, /done
-    ├── test_commands.py        # /pause /stop work even when the agent is dead
-    ├── test_agent_isolation.py # agent can't read data/ or write outside its state folder
-    └── test_scorer.py
+├── tests/                      # pytest; drives the real harness with real agent subprocesses
+│
+├── data/                       # HARNESS-OWNED, gitignored, created on first run
+│   ├── state.json              # current harness state
+│   ├── events.jsonl            # every event, action, rejection and user message, append-only
+│   ├── contracts/              # one frozen, read-only JSON per goal, named by its hash
+│   ├── verifications.jsonl     # every "did you achieve it?" request and answer
+│   ├── outcomes.jsonl          # closed goals: agent version, achieved, days
+│   ├── evidence/               # links submitted at verification
+│   ├── calendar/               # Google token and the Coach calendar's id
+│   └── scores.csv              # written by tools/score.py
+│
+└── agent_state/                # gitignored; one private folder per agent version
+    └── mock@1a2b3c4d/          # the agent's working directory and only writable space
 ```
 
 ## Who can write where
@@ -83,18 +60,12 @@ lifecoach/
 | Folder | Harness | Agent | Improving system |
 |---|---|---|---|
 | `harness/`, `protocol/`, `tests/` | — | ❌ | ❌ (read only) |
-| `data/` | ✅ append only | ❌ | ❌ (reads `scores.csv` only) |
+| `data/` | ✅ append only | ❌ | ❌ (reads scores only) |
 | `agents/<name>/` | ❌ | ❌ | ✅ |
 | `agent_state/<version>/` | ❌ | ✅ | ❌ |
 
+v0 enforces this with separate processes, a bare environment and separate working directories. An agent running as the same OS user could still read `data/` if it went looking. For real isolation, run agents in a container or as a different OS user, or keep the improving system in its own checkout and point `AGENT` at it.
+
 ## Agent versions
 
-An agent's version is the hash of its folder under `agents/`. Changing any file creates a new version with its own `agent_state/` folder and its own scores. A contract stays with the version it started with.
-
-## Build order
-
-1. `store`, `contract`, `telegram_io`, `commands`: a bot that can freeze a goal.
-2. `calendar`, `onboarding`: connect Google Calendar first.
-3. `relay`, `limits`, `buttons`, `agent_process`, plus `agents/baseline`: end-to-end with the dumb agent.
-4. `verifier`, `scorer`: the score exists.
-5. `proposals`, `safety`, then `agents/claude_coach`.
+An agent's version is the hash of every file in its folder. Changing any file creates a new version with its own `agent_state/` folder and its own scores. A goal stays with the version it was assigned to.

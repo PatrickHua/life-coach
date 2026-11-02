@@ -1,5 +1,7 @@
 # Harness ↔ agent protocol
 
+**Any agent works**: a frontier model behind an API, an open-source model on vLLM or Ollama, an agent framework, a CLI coding agent, a self-improving system. If it can read and write lines of JSON, it can be plugged in. See `agents/README.md` for how to wrap one.
+
 The agent is any program. The harness starts it once as a subprocess and they exchange **JSON lines**: one JSON object per line, harness → agent on the agent's stdin, agent → harness on its stdout. Anything the agent prints to stderr goes to a log and is otherwise ignored.
 
 - Working directory: `agent_state/<name>@<version>/`, the agent's only writable folder.
@@ -17,12 +19,21 @@ agent   → {"type":"done","event_id":"e42"}
 ```
 
 - The harness sends one event at a time and waits for `done` before sending the next.
+- Lines that aren't JSON objects are logged and ignored, so stray prints don't break anything. Use stderr for logs.
 - A turn must end within **60 seconds** (`TURN_TIMEOUT`). Time spent waiting on the harness for calendar data doesn't count.
 - If the turn times out or the agent crashes, the harness logs it against the agent, restarts the agent once, and falls back to `agents/baseline` if it fails again.
 
-### Requests inside a turn
+### Every action gets exactly one reply
 
-Some actions ask the harness for something. The harness answers on stdin **before** the next event, matched by `req_id`:
+After each action except `done`, the harness writes **exactly one** reply event to the agent's stdin before reading the next action. So an agent can always do: write an action, read one line.
+
+| Action | Reply |
+|---|---|
+| `send_message` | `message_sent` (with `message_id`) or `rejected` |
+| `get_calendar` | `calendar` or `rejected` |
+| everything else | `accepted` or `rejected` |
+
+Replies echo the action's `req_id` if it had one. Example:
 
 ```
 agent   → {"type":"get_calendar","req_id":"r1","start":"2026-11-04T00:00","end":"2026-11-05T00:00"}
@@ -62,18 +73,19 @@ Contracts are read-only copies. Changing them does nothing.
 | `user_message` | `text`, `reply_to?` | the user wrote something |
 | `button_tap` | `message_id`, `choice` | the user tapped one of the agent's buttons |
 | `wakeup` | `wakeup_id`, `note` | a scheduled wakeup fired |
-| `calendar` | `req_id`, `events` | answer to `get_calendar` |
+| `calendar` | `req_id`, `events` | reply to `get_calendar` |
 | `proposal_result` | `proposal_id`, `accepted` | the user answered a `propose_event` |
-| `message_sent` | `req_id`, `message_id` | a `send_message` was delivered |
-| `rejected` | `req_id?`, `action`, `reason`, `detail` | the harness refused an action |
-| `user_feedback` | `message_id`, `kind` | the user reacted 👎 or tapped "too pushy" |
+| `message_sent` | `message_id`, `req_id?` | reply: a `send_message` was delivered |
+| `accepted` | `action`, `req_id?` | reply: any other action was accepted |
+| `rejected` | `req_id?`, `action`, `reason`, `detail` | reply: the harness refused an action |
+| `user_feedback` | `message_id`, `kind` | the user sent /bad about the agent's last message |
 
 ## Actions (agent → harness)
 
 | Type | Fields | Notes |
 |---|---|---|
 | `send_message` | `text`, `more?`, `buttons?`, `why`, `req_id?` | see Message rules |
-| `schedule_wakeup` | `at`, `note`, `wakeup_id?` | `at` must be in the future |
+| `schedule_wakeup` | `at`, `note`, `wakeup_id?` | `at` must be in the future; at most 50 pending. Without `wakeup_id`, the harness picks one and returns it as `req_id` |
 | `cancel_wakeup` | `wakeup_id` | |
 | `get_calendar` | `req_id`, `start`, `end` | max range 31 days |
 | `propose_event` | `req_id`, `title`, `start`, `end`, `why` | the harness asks the user; answer comes as `proposal_result` |
@@ -160,7 +172,7 @@ The **agent decides when** to ask whether a goal is achieved. The **user gives t
 
 ## Harness-only commands
 
-Handled by the harness, never passed to the agent, and working even if the agent is down: `/start`, `/pause`, `/resume`, `/stop`, `/why`, `/undo`, `/goals`, `/export`, `/forget`, `/goal` (the fixed contract form), `/done` (start verification).
+Handled by the harness, never passed to the agent, and working even if the agent is down: `/start`, `/pause`, `/resume`, `/stop`, `/why`, `/undo`, `/goals`, `/export`, `/forget`, `/goal` (the fixed contract form), `/cancel` (leave the form), `/done` (start verification), `/skip` (send the evidence link later), `/bad` (flag the last coach message), `/log` (recent rejections and errors), `/help`.
 
 ## Buttons
 
@@ -175,4 +187,4 @@ Handled by the harness, never passed to the agent, and working even if the agent
 
 ## Rejection reasons
 
-`invalid_schema`, `too_long`, `too_many_pages`, `too_many_buttons`, `button_too_long`, `missing_why`, `over_daily_cap`, `min_gap`, `double_text`, `duplicate`, `quiet_hours`, `paused`, `verify_too_soon`, `verify_pending`, `unknown_contract`, `contract_closed`, `calendar_range`, `wakeup_in_past`, `unknown_wakeup`, `turn_timeout`.
+`invalid_schema`, `too_long`, `too_many_pages`, `too_many_buttons`, `button_too_long`, `missing_why`, `over_daily_cap`, `min_gap`, `double_text`, `duplicate`, `quiet_hours`, `paused`, `calendar_unavailable`, `too_many_wakeups`, `verify_too_soon`, `verify_pending`, `unknown_contract`, `contract_closed`, `calendar_range`, `wakeup_in_past`, `unknown_wakeup`, `turn_timeout`.

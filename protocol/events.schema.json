@@ -23,7 +23,8 @@
         "proposal_result",
         "message_sent",
         "rejected",
-        "user_feedback"
+        "user_feedback",
+        "accepted"
       ]
     },
     "id": {
@@ -257,7 +258,6 @@
       },
       "then": {
         "required": [
-          "req_id",
           "message_id"
         ],
         "properties": {
@@ -321,6 +321,28 @@
               "thumbs_down",
               "too_pushy"
             ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "accepted"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "req_id": {
+            "type": "string"
           }
         }
       }
@@ -475,6 +497,8 @@
         "calendar_range",
         "wakeup_in_past",
         "unknown_wakeup",
+        "calendar_unavailable",
+        "too_many_wakeups",
         "turn_timeout"
       ]
     }

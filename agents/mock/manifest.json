@@ -1,0 +1,6 @@
+{
+  "name": "mock",
+  "description": "Keyword-driven test agent. It doesn't coach; it exercises every part of the protocol.",
+  "command": ["python3", "{agent_dir}/agent.py"],
+  "env": []
+}

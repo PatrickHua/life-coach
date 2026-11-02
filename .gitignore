@@ -1,0 +1,12 @@
+.env
+data/
+agent_state/
+credentials.json
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+bot.log
+lifecoach-export-*.zip
+data-terminal/
+agent_state-terminal/
